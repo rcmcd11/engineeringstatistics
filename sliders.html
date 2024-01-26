@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Normal Curve with Sliders (JavaScript)</title>
+</head>
+<body>
+
+<h2>Normal Curve with Sliders (JavaScript)</h2>
+
+<canvas id="normalCurve" width="600" height="300"></canvas>
+
+<br><br>
+
+<label for="meanSlider">Mean:</label>
+<input type="range" id="meanSlider" min="-10" max="10" step="0.1" value="0">
+<span id="meanValue">0</span>
+
+<label for="stdDevSlider">Standard Deviation:</label>
+<input type="range" id="stdDevSlider" min="0.1" max="5" step="0.1" value="1">
+<span id="stdDevValue">1</span>
+
+<script>
+  // Function to calculate the normal distribution
+  function normalDistribution(x, mean, stdDev) {
+    return (1 / (stdDev * Math.sqrt(2 * Math.PI))) * Math.exp(-0.5 * Math.pow((x - mean) / stdDev, 2));
+  }
+
+  // Function to draw the normal curve on the canvas
+  function drawNormalCurve(mean, stdDev) {
+    const canvas = document.getElementById('normalCurve');
+    const ctx = canvas.getContext('2d');
+    const width = canvas.width;
+    const height = canvas.height;
+
+    ctx.clearRect(0, 0, width, height);
+
+    // Calculate an appropriate range for the y-axis based on standard deviation
+    const maxY = Math.max(1.0, normalDistribution(mean, mean, stdDev));
+
+    // Draw x-axis at the bottom
+    const xAxisY = height;
+    ctx.beginPath();
+    ctx.moveTo(0, xAxisY);
+    ctx.lineTo(width, xAxisY);
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // Draw y-axis on the left
+    const yAxisX = 0;
+    ctx.beginPath();
+    ctx.moveTo(yAxisX, 0);
+    ctx.lineTo(yAxisX, height);
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // Draw ticks and labels on x-axis
+    for (let i = -10; i <= 10; i++) {
+      const xTick = (i + 10) * (width / 20);
+      ctx.beginPath();
+      ctx.moveTo(xTick, xAxisY - 5);
+      ctx.lineTo(xTick, xAxisY + 15); // Adjusted position above the x-axis
+      ctx.strokeStyle = '#000000';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      ctx.font = '10px Arial';
+      ctx.fillStyle = '#000000';
+      ctx.textAlign = 'center'; // Center align the x-axis labels
+      ctx.fillText(i, xTick, xAxisY + 30); // Adjusted position above the x-axis
+    }
+
+    // Draw ticks and labels on y-axis
+    for (let i = 0; i <= maxY; i += maxY / 5) {
+      const yTick = height - i * height / (maxY * 1.5);
+      ctx.beginPath();
+      ctx.moveTo(yAxisX - 5, yTick);
+      ctx.lineTo(yAxisX + 15, yTick); // Adjusted position to the right of the y-axis
+      ctx.strokeStyle = '#000000';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      ctx.font = '10px Arial';
+      ctx.fillStyle = '#000000';
+      ctx.textAlign = 'right'; // Right align the y-axis labels
+      ctx.fillText(i.toFixed(2), yAxisX - 30, yTick + 5); // Adjusted position to the right of the y-axis
+    }
+
+    // Draw the normal curve
+    ctx.beginPath();
+    for (let i = 0; i <= width; i++) {
+      const x = i / (width / 20) - 10;
+      const y = height - normalDistribution(x, mean, stdDev) * height / (maxY * 1.5);
+
+      ctx.lineTo(i, y);
+    }
+
+    ctx.strokeStyle = '#ff0000';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  }
+
+  // Event listeners for sliders
+  const meanSlider = document.getElementById('meanSlider');
+  const stdDevSlider = document.getElementById('stdDevSlider');
+  const meanValue = document.getElementById('meanValue');
+  const stdDevValue = document.getElementById('stdDevValue');
+
+  meanSlider.addEventListener('input', () => {
+    meanValue.textContent = meanSlider.value;
+    drawNormalCurve(parseFloat(meanSlider.value), parseFloat(stdDevSlider.value));
+  });
+
+  stdDevSlider.addEventListener('input', () => {
+    stdDevValue.textContent = stdDevSlider.value;
+    drawNormalCurve(parseFloat(meanSlider.value), parseFloat(stdDevSlider.value));
+  });
+
+  // Initial draw
+  drawNormalCurve(parseFloat(meanSlider.value), parseFloat(stdDevSlider.value));
+</script>
+
+</body>
+</html>
